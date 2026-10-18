@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Documentary Animation Studio</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #050505;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    color: #fff;
+    overflow: hidden;
+  }
+
+  /* 16:9 Responsive Documentary Frame */
+  #player {
+    width: 96vw;
+    max-width: 960px;
+    aspect-ratio: 16 / 9;
+    position: relative;
+    overflow: hidden;
+    background: #111;
+    border-radius: 10px;
+    box-shadow: 0 0 35px rgba(255, 0, 55, 0.25);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .scene {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0; left: 0;
+    display: none;
+    overflow: hidden;
+  }
+  .scene.active { display: block; }
+
+  /* Documentary Black-Box Subtitle (Jaisa aapke screenshots mein hai) */
+  .subtitle-bar {
+    position: absolute;
+    bottom: 6%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 10, 10, 0.82);
+    color: #ffffff;
+    padding: 6px 16px;
+    border-radius: 5px;
+    font-size: clamp(11px, 2.2vw, 20px);
+    font-weight: 500;
+    white-space: nowrap;
+    z-index: 60;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  }
+
+  /* =========================================================
+     SCENE 1: 2.5D SUIT BG + GLOWING RED TEXT + MOVING ROAD
+     ========================================================= */
+  .s1-bg {
+    width: 100%; height: 100%;
+    background: url('https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+    filter: blur(2px) brightness(0.6);
+    animation: slowZoom 10s infinite alternate ease-in-out;
+  }
+  .s1-red-text {
+    position: absolute;
+    top: 38%;
+    left: 0;
+    font-size: clamp(24px, 6.5vw, 68px);
+    font-weight: 900;
+    color: #ff1a1a;
+    text-shadow: 0 0 20px #ff0000, 0 0 40px #b30000;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    animation: slideText 7s linear infinite;
+    z-index: 15;
+  }
+  .s1-road {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 200%; height: 22%;
+    background: 
+      repeating-linear-gradient(90deg, #eee 0px, #eee 35px, #222 35px, #222 70px) 0 0 / 100% 18px no-repeat,
+      linear-gradient(#4d5d3f 18px, #2b2b2b 18px, #1a1a1a 100%);
+    border-top: 3px solid #758763;
+    animation: moveRoad 1.8s linear infinite;
+    z-index: 20;
+  }
+  .s1-card {
+    position: absolute;
+    bottom: 10%;
+    left: 6%;
+    width: 38%;
+    height: 48%;
+    z-index: 30;
+    animation: bounce 0.6s infinite alternate ease-in-out;
+  }
+  .s1-card img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 2px solid rgba(255,255,255,0.4);
+    box-shadow: 10px 10px 25px rgba(0,0,0,0.9);
+  }
+
+  /* =========================================================
+     SCENE 2: REALISTIC RAIN + CEO WINDOW PORTRAIT
+     ========================================================= */
+  .s2-bg {
+    width: 100%; height: 100%;
+    background: url('https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+    animation: slowZoom 9s infinite alternate ease-in-out;
+    filter: contrast(1.15) brightness(0.8);
+  }
+  #rainCanvas {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 25;
+    pointer-events: none;
+  }
+  .s2-portrait {
+    position: absolute;
+    top: 8%; right: 6%;
+    width: 30%; height: 62%;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.5);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+    z-index: 30;
+    animation: floatUp 3s infinite alternate ease-in-out;
+  }
+  .s2-portrait img { width: 100%; height: 100%; object-fit: cover; }
+  .s2-tag {
+    position: absolute;
+    bottom: 0; width: 100%;
+    background: rgba(0,0,0,0.85);
+    color: #ffd700;
+    text-align: center;
+    padding: 5px;
+    font-size: clamp(9px, 1.5vw, 14px);
+    font-weight: bold;
+  }
+
+  /* =========================================================
+     SCENE 3: THE TIMES OF INDIA NEWSPAPER + GREEN HIGHLIGHTER
+     ========================================================= */
+  .s3-paper {
+    width: 100%; height: 100%;
+    background-color: #f2e3a9;
+    background-image: radial-gradient(rgba(139,69,19,0.1) 20%, transparent 80%);
+    color: #111;
+    padding: 3% 5%;
+    font-family: Georgia, 'Times New Roman', serif;
+    animation: paperZoom 9s forwards ease-out;
+  }
+  .toi-top {
+    text-align: center;
+    border-bottom: 2px solid #222;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    position: relative;
+  }
+  .toi-name { font-size: clamp(13px, 2.6vw, 24px); font-weight: bold; letter-spacing: 1px; }
+  .toi-date {
+    position: absolute;
+    right: 0; bottom: 4px;
+    font-family: Arial, sans-serif;
+    font-size: clamp(9px, 1.6vw, 15px);
+    font-weight: bold;
+  }
+  .toi-head {
+    font-family: Arial, sans-serif;
+    font-size: clamp(13px, 2.8vw, 27px);
+    font-weight: 900;
+    text-align: center;
+    margin: 6px 0 10px;
+    color: #000;
+  }
+  .toi-grid {
+    display: flex;
+    gap: 3%;
+    height: 60%;
+  }
+  .toi-img {
+    width: 42%;
+    height: 100%;
+    border: 1px solid #333;
+    overflow: hidden;
+  }
+  .toi-img img { width: 100%; height: 100%; object-fit: cover; }
+  .toi-text {
+    width: 55%;
+    font-family: Arial, sans-serif;
+    font-size: clamp(8.5px, 1.45vw, 14px);
+    line-height: 1.42;
+    text-align: justify;
+  }
+  .green-mark {
+    background: linear-gradient(90deg, #1aff1a 50%, transparent 50%);
+    background-size: 200% 100%;
+    background-position: 100% 0;
+    animation: sweepGreen 2.2s 0.4s forwards ease-out;
+    font-weight: bold;
+  }
+
+  /* =========================================================
+     SCENE 4: DRAMATIC FIRE / CRISIS VISUAL
+     ========================================================= */
+  .s4-bg {
+    width: 100%; height: 100%;
+    background: url('https://images.unsplash.com/photo-1568772585407-9361f9bf3a87?auto=format&fit=crop&w=1200&q=80') center/cover no-repeat;
+    filter: contrast(1.25) sepia(0.2) brightness(0.75);
+    animation: slowZoom 8s infinite alternate;
+  }
+  .fire-glow {
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 70%;
+    background: radial-gradient(circle at 55% 85%, rgba(255, 70, 0, 0.7), rgba(255, 0, 0, 0.3) 45%, transparent 75%);
+    mix-blend-mode: screen;
+    animation: flicker 0.2s infinite alternate;
+    z-index: 20;
+  }
+  .s4-box {
+    position: absolute;
+    top: 8%; left: 5%;
+    background: rgba(0,0,0,0.85);
+    border-left: 5px solid #ff3300;
+    padding: 10px 16px;
+    z-index: 35;
+    border-radius: 5px;
+  }
+  .s4-box h2 { color: #ff4500; font-size: clamp(12px, 2.3vw, 22px); }
+  .s4-box p { font-size: clamp(9px, 1.5vw, 14px); color: #ddd; margin-top: 3px; }
+
+  /* KEYFRAME ANIMATIONS */
+  @keyframes slowZoom { from { transform: scale(1); } to { transform: scale(1.12); } }
+  @keyframes paperZoom { from { transform: scale(1); } to { transform: scale(1.05); } }
+  @keyframes slideText { 0% { transform: translateX(5%); } 50% { transform: translateX(-25%); } 100% { transform: translateX(5%); } }
+  @keyframes moveRoad { from { transform: translateX(0); } to { transform: translateX(-140px); } }
+  @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-5px); } }
+  @keyframes floatUp { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+  @keyframes sweepGreen { to { background-position: 0% 0; } }
+  @keyframes flicker { from { opacity: 0.75; } to { opacity: 1; } }
+
+  /* TOP / BOTTOM CONTROLS */
+  .controls {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 10px;
+  }
+  button, label.btn {
+    background: #e11d48;
+    color: #fff;
+    border: none;
+    padding: 9px 14px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  button.story-btn { background: #00b894; }
+  input[type="file"] { display: none; }
+</style>
+</head>
+<body>
+
+<div id="player">
+  <!-- SCENE 1 -->
+  <div class="scene active" id="scene1">
+    <div class="s1-bg"></div>
+    <div class="s1-red-text" id="redText">SHUT DOWN ROYAL ENFIELD?</div>
+    <div class="s1-card">
+      <img class="custom-img" src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80" alt="Main Subject">
+    </div>
+    <div class="s1-road"></div>
+    <div class="subtitle-bar" id="sub1">In the late 1990s, Eicher board almost decided to shut down the company</div>
+  </div>
+
+  <!-- SCENE 2 -->
+  <div class="scene" id="scene2">
+    <div class="s2-bg"></div>
+    <canvas id="rainCanvas"></canvas>
+    <div class="s2-portrait">
+      <img class="custom-img" src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=800&q=80" alt="Leader">
+      <div class="s2-tag" id="tag2">2000: 26-Yr-Old CEO Siddhartha Lal</div>
+    </div>
+    <div class="subtitle-bar" id="sub2">He rode the bike daily in rain and traffic to find the real flaws</div>
+  </div>
+
+  <!-- SCENE 3 -->
+  <div class="scene" id="scene3">
+    <div class="s3-paper">
+      <div class="toi-top">
+        <div class="toi-name">THE TIMES OF INDIA</div>
+        <div class="toi-date" id="toiDate">Feb 2015</div>
+      </div>
+      <div class="toi-head" id="toiHead">ROYAL ENFIELD OVERTAKES HARLEY IN GLOBAL SALES</div>
+      <div class="toi-grid">
+        <div class="toi-img">
+          <img class="custom-img" src="https://images.unsplash.com/photo-1558981403-c5f9899a28bc?auto=format&fit=crop&w=800&q=80" alt="News">
+        </div>
+        <div class="toi-text" id="toiBody">
+          <span class="green-mark">Royal Enfield sold 3,02,591 motorcycles worldwide in 2014, beating Harley-Davidson's global sales of 2,67,999 units.</span>
+          With the new UCE engine and Classic 350 priced at Rs 98,086, annual growth surged by nearly 70% while Harley grew by just 3%. By FY 2024-25, sales crossed 10 lakh units annually.
+        </div>
+      </div>
+    </div>
+    <div class="subtitle-bar" id="sub3">Times of India reported that Royal Enfield beat Harley globally</div>
+  </div>
+
+  <!-- SCENE 4 -->
+  <div class="scene" id="scene4">
+    <div class="s4-bg"></div>
+    <div class="fire-glow"></div>
+    <div class="s4-box">
+      <h2 id="crisisTitle">24 Sept 2020: Harley India Exit</h2>
+      <p id="crisisDesc">11 Saal Mein Sirf ~30,000 Bikes | Bawal Factory Band | RE Crossed 10 Lakh+</p>
+    </div>
+    <div class="subtitle-bar" id="sub4">While Harley exited India, Royal Enfield set the global market on fire</div>
+  </div>
+</div>
+
+<div class="controls">
+  <button onclick="changeScene(-1)">⬅ Pichhla</button>
+  <button onclick="changeScene(1)">Agla Scene ➡</button>
+  <button class="story-btn" onclick="toggleStory()">🔄 Switch: Royal Enfield / Ambani</button>
+  <label class="btn" for="imgInput">📷 Apni Photo Lagayein</label>
+  <input type="file" id="imgInput" accept="image/*" onchange="uploadPhoto(event)">
+</div>
+
+<script>
+  let current = 1;
+  const total = 4;
+  let isAmbani = false;
+
+  function changeScene(dir) {
+    document.getElementById('scene' + current).classList.remove('active');
+    current += dir;
+    if (current > total) current = 1;
+    if (current < 1) current = total;
+    document.getElementById('scene' + current).classList.add('active');
+  }
+
+  function uploadPhoto(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    const activeImg = document.querySelector('.scene.active .custom-img');
+    if (activeImg) activeImg.src = url;
+  }
+
+  function toggleStory() {
+    isAmbani = !isAmbani;
+    if (isAmbani) {
+      document.getElementById('redText').innerText = "CRORES EVERY MINUTE!";
+      document.getElementById('sub1').innerText = "Dhirubhai started his journey as a petrol pump clerk in scorching heat";
+      document.getElementById('tag2').innerText = "1986: Comeback After Stroke";
+      document.getElementById('sub2').innerText = "Even after a massive stroke in 1986, the fire in his eyes never faded";
+      document.getElementById('toiDate').innerText = "May 1982";
+      document.getElementById('toiHead').innerText = "RELIANCE DEFEATS KOLKATA BEAR CARTEL IN STOCK WAR";
+      document.getElementById('toiBody').innerHTML = '<span class="green-mark">After Bear Cartel short-sold 3.5 lakh shares, mysterious NRI buyers bought Rs 10 crore worth of Reliance stock, pushing price from Rs 121 to Rs 201.</span> Earlier in 1977, Reliance IPO of 28 lakh shares at Rs 10 was oversubscribed 7 times, multiplying middle-class wealth by 5X.';
+      document.getElementById('sub3').innerText = "General public created massive wealth from the stock market for the first time";
+      document.getElementById('crisisTitle').innerText = "Patalganga Floods To Jamnagar Empire";
+      document.getElementById('crisisDesc').innerText = "Plant Restored in 1 Month | $6B Jamnagar Refinery | 1 Lakh+ Mango Trees";
+      document.getElementById('sub4').innerText = "From a 350 sq ft room to India's biggest company — Reliance Industries";
+    } else {
+      location.reload();
+    }
+  }
+
+  // Rain Animation
+  const canvas = document.getElementById('rainCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = 960; canvas.height = 540;
+  const drops = Array.from({length: 120}, () => ({
+    x: Math.random() * 960, y: Math.random() * 540,
+    len: Math.random() * 20 + 10, speed: Math.random() * 8 + 10
+  }));
+
+  function rain() {
+    ctx.clearRect(0, 0, 960, 540);
+    ctx.strokeStyle = 'rgba(200, 225, 255, 0.55)';
+    ctx.lineWidth = 1.5;
+    drops.forEach(d => {
+      ctx.beginPath();
+      ctx.moveTo(d.x, d.y);
+      ctx.lineTo(d.x - 3, d.y + d.len);
+      ctx.stroke();
+      d.y += d.speed; d.x -= 1.5;
+      if (d.y > 540) { d.y = -20; d.x = Math.random() * 960; }
+    });
+    requestAnimationFrame(rain);
+  }
+  rain();
+</script>
+</body>
+</html>
+
